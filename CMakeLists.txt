@@ -21,15 +21,17 @@ add_library(canvas2D SHARED
         include/canvas2D/Font.hpp
         include/canvas2D/Color.hpp
         include/canvas2D/Shader.hpp
+
         src/Canvas.cpp
         src/Color.cpp
         src/Font.cpp
         src/Path.cpp
         src/Shader.cpp
-        src/Texture.cpp)
+        src/Texture.cpp
+)
 
 target_link_libraries(canvas2D PUBLIC OpenGL::OpenGL glm::glm SAIL::sail-c++)
-target_include_directories(canvas2D PUBLIC OpenGL::OpenGL glm::glm SAIL::sail-c++)
+target_include_directories(canvas2D PUBLIC include OpenGL::OpenGL glm::glm SAIL::sail-c++)
 
 if(CANVAS2D_BUILD_EXAMPLE)
     add_executable(canvas2D_test example/main.cpp example/Painting.hpp example/Painting.cpp)

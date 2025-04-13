@@ -1,24 +1,20 @@
-#include <GL/gl.h>
-#include <GL/glcorearb.h>
-#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-// Callback for key events
+#include "Painting.hpp"
+#include "canvas2D/Canvas.hpp"
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
         std::cout << "Key pressed: " << key << std::endl;
     }
 }
 
-// Callback for mouse movement
 void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     std::cout << "Mouse moved to: (" << xpos << ", " << ypos << ")" << std::endl;
 }
 
-// Callback for window resize
 void framebufferSizeCallback(GLFWwindow* window, const int width, const int height) {
-    glViewport(0, 0, width, height);
     std::cout << "Window resized to: " << width << "x" << height << std::endl;
 }
 
@@ -36,15 +32,20 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
+    auto painter = Painter();
+    auto canvas = canvas2D::Canvas();
+
+    glfwSetWindowUserPointer(window,&painter);
 
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, cursorPositionCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    glClearColor(0,1,0,1);
+    constexpr auto alpha = 0.35f;
+    glClearColor(alpha,alpha,alpha,1);
 
     while (!glfwWindowShouldClose(window)) {
-            glClear(GL_COLOR_BUFFER_BIT);
+        painter.onDraw(canvas);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

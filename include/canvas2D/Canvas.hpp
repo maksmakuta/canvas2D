@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "Color.hpp"
 #include "Path.hpp"
 #include "Texture.hpp"
 
@@ -19,6 +20,9 @@ namespace canvas2D {
     public:
         Canvas() = default;
         ~Canvas() = default;
+
+        void clear();
+        void setClearColor(const Color&);
 
         //state operations
         void save();
