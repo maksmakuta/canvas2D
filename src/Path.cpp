@@ -1,7 +1,8 @@
 #include "canvas2D/Path.hpp"
 
-#include <glm/detail/func_geometric.inl>
-#include <glm/detail/func_trigonometric.inl>
+#include <cmath>
+#include <glm/geometric.hpp>
+#include <glm/trigonometric.hpp>
 #include <glm/gtc/constants.hpp>
 
 namespace canvas2D {
