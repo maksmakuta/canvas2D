@@ -7,6 +7,8 @@
 #include "Path.hpp"
 #include "Texture.hpp"
 
+#include <glm/mat4x4.hpp>
+
 namespace canvas2D {
 
     enum class FillRule {
@@ -35,15 +37,16 @@ namespace canvas2D {
         void transform(float x,float y);
         void transform(float a,float b,float c,float d,float e,float f);
 
+        [[nodiscard]] glm::mat4 getTransform() const;
         void setTransform(float a,float b,float c,float d,float e,float f);
-        //void setTransform(const glm::mat3x2&);
+        void setTransform(const glm::mat4&);
+        void resetTransform();
 
         // rect methods
         void clearRect(float x, float y, float w, float h);
         void fillRect(float x, float y, float w, float h);
         void strokeRect(float x, float y, float w, float h);
 
-        void beginPath();
         void fill(FillRule = FillRule::NonZero);
         void fill(const Path&, FillRule = FillRule::NonZero);
         void stroke(FillRule = FillRule::NonZero);
@@ -60,6 +63,9 @@ namespace canvas2D {
         void drawImage(const Texture& image, float x, float y, float w, float h);
         void drawImage(const Texture& image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 
+    private:
+        glm::mat4 m_mat;
+        glm::mat4 m_projection;
     };
 
 }

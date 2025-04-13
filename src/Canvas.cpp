@@ -1,48 +1,133 @@
 #include "canvas2D/Canvas.hpp"
 
+#include <GL/gl.h>
+#include <GL/glcorearb.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace canvas2D {
 
     void Canvas::clear() {
-
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void setClearColor(const Color&);
+    void Canvas::setClearColor(const Color& c) {
+        glClearColor(c.getR(),c.getG(),c.getB(),c.getA());
+    }
 
-    //state operations
-    void save();
-    void restore();
-    void reset();
+    void Canvas::save(){
+        //TODO(not implemented)
+    }
 
-    // matrix operations
-    void scale(float x,float y);
-    void rotate(float a);
-    void transform(float x,float y);
-    void transform(float a,float b,float c,float d,float e,float f);
+    void Canvas::restore(){
+        //TODO(not implemented)
+    }
 
-    void setTransform(float a,float b,float c,float d,float e,float f);
-    //void setTransform(const glm::mat3x2&);
+    void Canvas::reset(){
+        //TODO(not implemented)
+    }
 
-    // rect methods
-    void clearRect(float x, float y, float w, float h);
-    void fillRect(float x, float y, float w, float h);
-    void strokeRect(float x, float y, float w, float h);
+    void Canvas::scale(const float x, const float y){
+        m_mat = glm::scale(m_mat,glm::vec3{x,y,1});
+    }
 
-    void beginPath();
-    void fill(FillRule = FillRule::NonZero);
-    void fill(const Path&, FillRule = FillRule::NonZero);
-    void stroke(FillRule = FillRule::NonZero);
-    void stroke(const Path&, FillRule = FillRule::NonZero);
-    void clip(FillRule = FillRule::NonZero);
-    void clip(const Path&, FillRule = FillRule::NonZero);
+    void Canvas::rotate(const float a){
+        m_mat = glm::rotate(m_mat,a,glm::vec3{1,0,0});
+    }
 
-    // text rendering
-    void fillText(const std::string& text, float x,float y);
-    void strokeText(const std::string& text, float x,float y);
-    Box measureText(const std::string& text, float x,float y);
+    void Canvas::transform(const float x, const float y){
+        m_mat = glm::translate(m_mat,glm::vec3{x,y,1});
+    }
 
-    void drawImage(const Texture& image, float x, float y);
-    void drawImage(const Texture& image, float x, float y, float w, float h);
-    void drawImage(const Texture& image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
+    void Canvas::transform(const float a, const float b, const float c, const float d, const float e, const float f){
+        const auto mat = glm::mat4{
+            a,b,c,0,
+            d,e,f,0,
+            0,0,1,0,
+            0,0,0,1
+        };
 
+        m_mat *= mat;
+    }
+
+    glm::mat4 Canvas::getTransform() const {
+        return m_mat;
+    }
+
+    void Canvas::setTransform(float a,float b,float c,float d,float e,float f) {
+        m_mat = glm::mat4{
+            a,b,c,0,
+            d,e,f,0,
+            0,0,1,0,
+            0,0,0,1
+        };
+    }
+
+    void Canvas::setTransform(const glm::mat4& mat) {
+        m_mat = mat;
+    }
+
+    void Canvas::resetTransform() {
+        m_mat = glm::identity<float>();
+    }
+
+    void Canvas::clearRect(float x, float y, float w, float h){
+        //TODO(not implemented)
+    }
+    void Canvas::fillRect(float x, float y, float w, float h){
+        //TODO(not implemented)
+    }
+    void Canvas::strokeRect(float x, float y, float w, float h){
+        //TODO(not implemented)
+    }
+
+    void Canvas::fill(FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::fill(const Path&, FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::stroke(FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::stroke(const Path&, FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::clip(FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::clip(const Path&, FillRule){
+        //TODO(not implemented)
+    }
+
+    void Canvas::fillText(const std::string& text, float x,float y){
+        //TODO(not implemented)
+    }
+
+    void Canvas::strokeText(const std::string& text, float x,float y){
+        //TODO(not implemented)
+    }
+
+    Box Canvas::measureText(const std::string& text, float x,float y){
+        //TODO(not implemented)
+        return {};
+    }
+
+    void Canvas::drawImage(const Texture& image, float x, float y){
+        //TODO(not implemented)
+    }
+
+    void Canvas::drawImage(const Texture& image, float x, float y, float w, float h){
+        //TODO(not implemented)
+    }
+
+    void Canvas::drawImage(const Texture& image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh){
+        //TODO(not implemented)
+    }
 
 }
