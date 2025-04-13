@@ -5,7 +5,14 @@ project(canvas2D
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-option(CANVAS2D_BUILD_EXAMPLE ON)
+set(CANVAS2D_BUILD_EXAMPLE ON)
+
+find_package(OpenGL REQUIRED)
+find_package(glm REQUIRED)
+find_package(SailC++ REQUIRED)
+
+option(SAIL_ASAN "Enable ASAN with supported compilers." ON)
+option(OPTION_BUILD_OWN_KHR_HEADERS "" ON)
 
 add_library(canvas2D SHARED
         include/canvas2D/Canvas.hpp
@@ -21,18 +28,14 @@ add_library(canvas2D SHARED
         src/Shader.cpp
         src/Texture.cpp)
 
-add_executable(canvas2D_test example/main.cpp example/Painting.hpp example/Painting.cpp)
-
-find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
-find_package(Sail REQUIRED)
-
-target_link_libraries(canvas2D PRIVATE OpenGL::OpenGL glm::glm Sail-c++)
-target_include_directories(canvas2D PRIVATE OpenGL::OpenGL glm::glm Sail-c++)
+target_link_libraries(canvas2D PUBLIC OpenGL::OpenGL glm::glm SAIL::sail-c++)
+target_include_directories(canvas2D PUBLIC OpenGL::OpenGL glm::glm SAIL::sail-c++)
 
 if(CANVAS2D_BUILD_EXAMPLE)
-find_package(glfw3 REQUIRED)
+    add_executable(canvas2D_test example/main.cpp example/Painting.hpp example/Painting.cpp)
 
-target_include_directories(canvas2D_test PRIVATE include glfw)
-target_link_libraries(canvas2D_test PRIVATE canvas2D glfw)
+    find_package(glfw3 REQUIRED)
+
+    target_include_directories(canvas2D_test PUBLIC include glfw)
+    target_link_libraries(canvas2D_test PUBLIC canvas2D glfw)
 endif ()
