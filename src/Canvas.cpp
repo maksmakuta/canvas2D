@@ -1,11 +1,17 @@
 #include "canvas2D/Canvas.hpp"
-
-#include <GL/gl.h>
-#include <GL/glcorearb.h>
-
 #include <glm/gtc/matrix_transform.hpp>
+#include "gl/gl.h"
 
 namespace canvas2D {
+
+    void loadOpenGL(const loader func) {
+        gladLoadGL(func);
+    }
+
+    void Canvas::onResize(const glm::vec2 &size) {
+        glViewport(0,0,static_cast<int>(size.x),static_cast<int>(size.y));
+        m_proj = glm::ortho(0.f,size.x,size.y,0.f);
+    }
 
     void Canvas::clear() {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -35,7 +41,7 @@ namespace canvas2D {
         m_mat = glm::rotate(m_mat,a,glm::vec3{1,0,0});
     }
 
-    void Canvas::transform(const float x, const float y){
+    void Canvas::translate(const float x, const float y){
         m_mat = glm::translate(m_mat,glm::vec3{x,y,1});
     }
 
@@ -71,14 +77,21 @@ namespace canvas2D {
         m_mat = glm::identity<float>();
     }
 
-    void Canvas::clearRect(float x, float y, float w, float h){
-        //TODO(not implemented)
+    void Canvas::clearRect(const float x, const float y, const float w, const float h){
+        glScissor(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h));
+        glEnable(GL_SCISSOR_TEST);
     }
-    void Canvas::fillRect(float x, float y, float w, float h){
-        //TODO(not implemented)
+
+    void Canvas::fillRect(const float x, const float y, const float w, const float h){
+        Path temp;
+        temp.rect(x,y,w,h);
+        fill(temp);
     }
-    void Canvas::strokeRect(float x, float y, float w, float h){
-        //TODO(not implemented)
+
+    void Canvas::strokeRect(const float x, const float y, const float w, const float h){
+        Path temp;
+        temp.rect(x,y,w,h);
+        stroke(temp);
     }
 
     void Canvas::fill(FillRule){

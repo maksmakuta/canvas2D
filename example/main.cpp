@@ -4,18 +4,26 @@
 #include "Painting.hpp"
 #include "canvas2D/Canvas.hpp"
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS) {
-        std::cout << "Key pressed: " << key << std::endl;
+Painter* getPainter(GLFWwindow* w) {
+    return static_cast<Painter*>(glfwGetWindowUserPointer(w));
+}
+
+void keyCallback(GLFWwindow* window, const int key, int, const int action, const int mods) {
+    if (const auto p = getPainter(window); p != nullptr) {
+        p->onKey(key,action,mods);
     }
 }
 
-void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
-    std::cout << "Mouse moved to: (" << xpos << ", " << ypos << ")" << std::endl;
+void cursorPositionCallback(GLFWwindow* window,const double x, const double y) {
+    if (const auto p = getPainter(window); p != nullptr) {
+        p->onMouse({x,y});
+    }
 }
 
-void framebufferSizeCallback(GLFWwindow* window, const int width, const int height) {
-    std::cout << "Window resized to: " << width << "x" << height << std::endl;
+void framebufferSizeCallback(GLFWwindow* window, const int w, const int h) {
+    if (const auto p = getPainter(window); p != nullptr) {
+        p->onResize({w,h});
+    }
 }
 
 int main() {
@@ -32,7 +40,9 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
+    canvas2D::loadOpenGL(glfwGetProcAddress);
     auto painter = Painter();
+    painter.onResize({800,600});
     auto canvas = canvas2D::Canvas();
 
     glfwSetWindowUserPointer(window,&painter);
@@ -40,9 +50,6 @@ int main() {
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, cursorPositionCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
-    constexpr auto alpha = 0.35f;
-    glClearColor(alpha,alpha,alpha,1);
 
     while (!glfwWindowShouldClose(window)) {
         painter.onDraw(canvas);

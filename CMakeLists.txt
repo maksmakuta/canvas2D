@@ -22,6 +22,9 @@ add_library(canvas2D SHARED
         include/canvas2D/Color.hpp
         include/canvas2D/Shader.hpp
 
+        src/gl/khrplatform.h
+        src/gl/gl.h
+        src/gl/gl.c
         src/Canvas.cpp
         src/Color.cpp
         src/Font.cpp

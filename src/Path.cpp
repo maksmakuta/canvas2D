@@ -32,7 +32,7 @@ namespace canvas2D {
     }
 
     glm::vec2 findCenter(const glm::vec2& T,const glm::vec2& d, const float r, const glm::vec2& dirTan) {
-        const auto dn =
+        auto dn =
           std::abs(d.x) < std::abs(d.y)
             ? glm::vec2(1, -d.x / d.y)
             : glm::vec2(-d.y / d.x, 1);
@@ -96,9 +96,9 @@ namespace canvas2D {
         }
 
         constexpr float dt = 0.1f;
-        constexpr auto a = m_data.front();
-        constexpr auto b = glm::vec2{x1,y1};
-        constexpr auto c = glm::vec2{x2,y2};
+        auto a = m_data.front();
+        const auto b = glm::vec2{x1,y1};
+        const auto c = glm::vec2{x2,y2};
         float t = 0.f;
         while (t <= 1.f) {
             auto t1 = glm::mix(a,b,t);
@@ -114,10 +114,10 @@ namespace canvas2D {
         }
 
         constexpr float dt = 0.1f;
-        constexpr auto a = m_data.front();
-        constexpr auto b = glm::vec2{x1,y1};
-        constexpr auto c = glm::vec2{x2,y2};
-        constexpr auto d = glm::vec2{x3,y3};
+        auto a = m_data.front();
+        const auto b = glm::vec2{x1,y1};
+        const auto c = glm::vec2{x2,y2};
+        const auto d = glm::vec2{x3,y3};
         float t = 0.f;
         while (t <= 1.f) {
             auto t1 = glm::mix(a,b,t);
@@ -229,8 +229,8 @@ namespace canvas2D {
             end = glm::two_pi<float>();
         }
 
-        constexpr auto center = glm::vec2{x,y};
-        constexpr auto dir = glm::vec2{rx,ry};
+        const auto center = glm::vec2{x,y};
+        const auto dir = glm::vec2{rx,ry};
         constexpr auto dt = glm::radians(5.f);
         float t = start;
         while (t <= end) {
