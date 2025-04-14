@@ -74,7 +74,7 @@ namespace canvas2D {
     }
 
     void Canvas::resetTransform() {
-        m_mat = glm::identity<float>();
+        m_mat = glm::mat4{1.0f};
     }
 
     void Canvas::clearRect(const float x, const float y, const float w, const float h){
@@ -94,23 +94,11 @@ namespace canvas2D {
         stroke(temp);
     }
 
-    void Canvas::fill(FillRule){
-        //TODO(not implemented)
-    }
-
     void Canvas::fill(const Path&, FillRule){
         //TODO(not implemented)
     }
 
-    void Canvas::stroke(FillRule){
-        //TODO(not implemented)
-    }
-
     void Canvas::stroke(const Path&, FillRule){
-        //TODO(not implemented)
-    }
-
-    void Canvas::clip(FillRule){
         //TODO(not implemented)
     }
 

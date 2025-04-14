@@ -57,11 +57,8 @@ namespace canvas2D {
         void strokeRect(float x, float y, float w, float h);
 
         // drawing methods
-        void fill(FillRule = FillRule::NonZero);
         void fill(const Path&, FillRule = FillRule::NonZero);
-        void stroke(FillRule = FillRule::NonZero);
         void stroke(const Path&, FillRule = FillRule::NonZero);
-        void clip(FillRule = FillRule::NonZero);
         void clip(const Path&, FillRule = FillRule::NonZero);
 
         // text rendering
