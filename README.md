@@ -8,3 +8,4 @@
   - OpenGL
   - GLM
   - SailC++
+  - Freetype

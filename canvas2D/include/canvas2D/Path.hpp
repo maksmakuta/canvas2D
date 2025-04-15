@@ -62,6 +62,18 @@ namespace canvas2D {
         >;
     }
 
+    enum class LineCap {
+        Butt,
+        Round,
+        Square
+    };
+
+    enum class LineJoin {
+        Round,
+        Bevel,
+        Miter
+    };
+
     class Path {
     public:
         Path();
