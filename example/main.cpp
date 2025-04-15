@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "Example.hpp"
-#include "canvas2D/Canvas.hpp"
 
 Example* getExample(GLFWwindow* w) {
     return static_cast<Example *>(glfwGetWindowUserPointer(w));
