@@ -3,8 +3,6 @@
 
 #include "canvas2D/Canvas.hpp"
 
-#include <glm/vec2.hpp>
-
 class Example {
 public:
     Example();

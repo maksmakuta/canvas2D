@@ -24,7 +24,7 @@ find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 
 target_link_libraries(canvas2D
-        PUBLIC glad OpenGL::GL glm::glm
+        PUBLIC glad tess2 OpenGL::GL glm::glm
 )
 target_include_directories(canvas2D
-        PUBLIC glad OpenGL::GL glm::glm)
+        PUBLIC glad tess2 OpenGL::GL glm::glm)
