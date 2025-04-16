@@ -58,18 +58,163 @@ namespace canvas2D{
         m_transform = glm::mat4{1.f};
     }
 
+    Gradient Canvas::createLinearGradient(double x0, double y0, double x1, double y1){
+        //TODO(Canvas::createLinearGradient)
+        return {};
+    }
 
-    /**
-     *
-    *
-    *void Canvas::clearRect(float x, float y, float w, float h) {
+    Gradient Canvas::createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1){
+        //TODO(Canvas::createRadialGradient)
+        return {};
+    }
+
+    Gradient Canvas::createConicGradient(double startAngle, double x, double y){
+        //TODO(Canvas::createConicGradient);
+        return {};
+    }
+
+    Pattern  Canvas::createPattern(const Image& image, const std::string& repetition){
+        //TODO(Canvas::createPattern);
+        return {};
+    }
+
+    int asInt(const float f) {
+        return static_cast<int>(f);
+    }
+
+    void Canvas::clearRect(const float x, const float y, const float w, const float h){
         glEnable(GL_SCISSOR_TEST);
-        glScissor(x, y, w, h);
+        glScissor((asInt(x)), asInt(y), asInt(w), asInt(h));
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_SCISSOR_TEST);
     }
-     *
-     */
+
+    void Canvas::fillRect(const float x, const float y, const float w, const float h){
+        Path p;
+        p.rect(x,y,w,h);
+        fill(p);
+    }
+
+    void Canvas::strokeRect(const float x, const float y, const float w, const float h){
+        Path p;
+        p.rect(x,y,w,h);
+        stroke(p);
+    }
+
+    void Canvas::beginPath(){
+        m_path.clear();
+    }
+
+    void Canvas::fill(FillRule fillRule){
+
+    }
+
+    void Canvas::fill(const Path& path, FillRule fillRule){
+
+    }
+
+    void Canvas::stroke(){
+
+    }
+
+    void Canvas::stroke(const Path& path){
+
+    }
+
+    void Canvas::clip(FillRule fillRule){
+
+    }
+
+    void Canvas::clip(const Path& path, FillRule fillRule){
+
+    }
+
+    bool Canvas::isPointInPath(float x, float y, FillRule fillRule){
+        return false;
+    }
+
+    bool Canvas::isPointInPath(const Path& path, float x, float y, FillRule fillRule){
+        return false;
+    }
+
+    bool Canvas::isPointInStroke(float x, float y){
+        return false;
+    }
+
+    bool Canvas::isPointInStroke(const Path& path, float x, float y){
+        return false;
+    }
+
+    void Canvas::fillText(const std::string& text, float x, float y, float maxWidth){
+
+    }
+
+    void Canvas::strokeText(const std::string& text, float x, float y, float maxWidth){
+
+    }
+
+    TextMetrics Canvas::measureText(const std::string& text) {
+        return {};
+    }
+
+    void Canvas::drawImage(const Image& image, float dx, float dy){
+
+    }
+
+    void Canvas::drawImage(const Image& image, float dx, float dy, float dw, float dh){
+
+    }
+
+    void Canvas::drawImage(const Image& image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh){
+
+    }
+
+    void Canvas::closePath(){
+        m_path.closePath();
+    }
+
+    void Canvas::moveTo(const float x, const float y){
+        m_path.moveTo(x,y);
+    }
+
+    void Canvas::lineTo(const float x, const float y){
+        m_path.lineTo(x,y);
+    }
+
+    void Canvas::quadraticCurveTo(const float cpx, const float cpy, const float x, const float y){
+        m_path.quadraticCurveTo(cpx,cpy,x,y);
+    }
+
+    void Canvas::bezierCurveTo(const float cp1x, const float cp1y, const float cp2x, const float cp2y, const float x, const float y){
+        m_path.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,x,y);
+    }
+
+    void Canvas::arcTo(const float x1, const float y1, const float x2, const float y2, const float radius){
+        m_path.arcTo(x1,y1,x2,y2,radius);
+    }
+
+    void Canvas::rect(const float x, const float y, const float w, const float h){
+        m_path.rect(x,y,w,h);
+    }
+
+    void Canvas::roundRect(const float x, const float y, const float w, const float h, const std::initializer_list<float>& radii){
+
+    }
+
+    void Canvas::roundRect(const float x, const float y, const float w, const float h, const std::initializer_list<glm::vec2>& radii){
+
+    }
+
+    void Canvas::arc(const float x, const float y, const float radius,
+                     const float startAngle, const float endAngle, const bool counterclockwise){
+        m_path.arc(x,y,radius,startAngle,endAngle,counterclockwise);
+    }
+
+    void Canvas::ellipse(const float x, const float y,
+                         const float radiusX, const float radiusY, const float rotation,
+                         const float startAngle, const float endAngle, const bool counterclockwise){
+        m_path.ellipse(x,y,radiusX,radiusY,rotation,startAngle,endAngle,counterclockwise);
+    }
 
 }

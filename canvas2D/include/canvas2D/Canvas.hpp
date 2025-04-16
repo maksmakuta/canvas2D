@@ -32,7 +32,7 @@ namespace canvas2D{
         void rotate(float angle);
         void translate(float x, float y);
         void transform(float a, float b, float c, float d, float e, float f);
-        glm::mat4 getTransform() const;
+        [[nodiscard]] glm::mat4 getTransform() const;
         void setTransform(float a, float b, float c, float d, float e, float f);
         void setTransform(const glm::mat4&);
         void resetTransform();
@@ -83,9 +83,11 @@ namespace canvas2D{
         void roundRect(float x, float y, float w, float h, const std::initializer_list<glm::vec2>& radii = {});
         void arc(float x, float y, float radius, float startAngle, float endAngle, bool counterclockwise = false);
         void ellipse(float x, float y, float radiusX, float radiusY, float rotation, float startAngle, float endAngle, bool counterclockwise = false);
+
     private:
         glm::mat4 m_transform{1.f};
         glm::mat4 m_projection{1.f};
+        Path m_path;
     };
 
 };
