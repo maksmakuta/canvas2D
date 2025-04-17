@@ -4,6 +4,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "libtess2/tesselator.h"
+
 namespace canvas2D{
 
     namespace OpenGL {
@@ -14,7 +16,62 @@ namespace canvas2D{
 
     }
 
+    namespace internal {
+
+        std::vector<glm::vec2> triangulatePath(const Path& path,FillRule fillRule) {
+            std::vector<std::vector<glm::vec2>> contours;
+            std::vector<glm::vec2> currentContour;
+
+            for (const auto& cmd : path.commands()) {
+
+            }
+
+            if (!currentContour.empty()) {
+                contours.push_back(std::move(currentContour));
+            }
+
+            std::vector<glm::vec2> triangles;
+
+            TESStesselator* tess = tessNewTess(nullptr);
+            if (!tess) return triangles;
+
+            for (const auto& contour : contours) {
+                if (contour.size() < 3) continue;
+                tessAddContour(tess, 2, contour.data(), sizeof(glm::vec2), static_cast<int>(contour.size()));
+            }
+
+            if (tessTesselate(tess, fillRule == FillRule::NonZero ? TESS_WINDING_NONZERO : TESS_WINDING_ODD,
+                TESS_POLYGONS, 3, 2, nullptr)
+            ) {
+                const float* verts = tessGetVertices(tess);
+                const int* elems = tessGetElements(tess);
+                const int nelems = tessGetElementCount(tess);
+
+                for (int i = 0; i < nelems; ++i) {
+                    const int* tri = &elems[i * 3];
+                    for (int j = 0; j < 3; ++j) {
+                        int idx = tri[j];
+                        triangles.emplace_back(verts[idx * 2 + 0], verts[idx * 2 + 1]);
+                    }
+                }
+            }
+
+            tessDeleteTess(tess);
+            return triangles;
+        }
+
+    }
+
     Canvas::Canvas() = default;
+
+    void Canvas::clear(const Color & color){
+        glClearColor(color.r,color.g,color.b,color.a);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void Canvas::resize(const int w, const int h){
+        m_projection = glm::ortho(0.f,static_cast<float>(w),static_cast<float>(h),0.f);
+    }
 
     void Canvas::scale(const float x, const float y){
         m_transform = glm::scale(m_transform,glm::vec3{x,y,1});
@@ -106,12 +163,12 @@ namespace canvas2D{
         m_path.clear();
     }
 
-    void Canvas::fill(FillRule fillRule){
-
+    void Canvas::fill(const FillRule fillRule){
+        fill(m_path,fillRule);
     }
 
     void Canvas::fill(const Path& path, FillRule fillRule){
-
+        const auto polygon = internal::triangulatePath(path,fillRule);
     }
 
     void Canvas::stroke(){

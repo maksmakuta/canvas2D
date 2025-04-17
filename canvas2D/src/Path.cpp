@@ -10,13 +10,6 @@ namespace canvas2D{
         return {v.x,v.y};
     }
 
-    template<class... Ts>
-    struct overload : Ts... { using Ts::operator()...; };
-
-    template<class... Ts>
-    overload(Ts...) -> overload<Ts...>;
-
-
     void Path::addPath(const Path& p, const glm::mat4 &m) {
         if (p.commands().empty()) {
             return;
@@ -28,7 +21,7 @@ namespace canvas2D{
 
         if (m != glm::mat4{1.f}) {
             for (const auto& item : p.m_commands) {
-                std::visit(overload{
+                std::visit(internal::overload{
                     [&m, this](const internal::MoveTo& mt) {
                         m_commands.emplace_back(internal::MoveTo{transform(mt.point,m)});
                     },

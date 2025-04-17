@@ -15,3 +15,9 @@
  These dependencies are included in external directory
   - glad
   - libtess2
+
+### Screenshot ([see example](example/Example.cpp))
+
+![image](example/screenshots/img_clearRect.png)
+
+ Older screenshots [here](/example/screenshots)

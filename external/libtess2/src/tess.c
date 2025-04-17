@@ -29,7 +29,6 @@
 ** Author: Eric Veach, July 1994.
 */
 
-#include <stddef.h>
 #include <assert.h>
 #include <setjmp.h>
 #include "bucketalloc.h"
@@ -38,7 +37,6 @@
 #include "sweep.h"
 #include "geom.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define TRUE 1
@@ -998,6 +996,8 @@ void tessSetOption( TESStesselator *tess, int option, int value )
 		break;
 	case TESS_REVERSE_CONTOURS:
 		tess->reverseContours = value > 0 ? 1 : 0;
+		break;
+	default:
 		break;
 	}
 }

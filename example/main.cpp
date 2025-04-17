@@ -53,7 +53,6 @@ int main(){
         return -1;
     }
     auto example = Example();
-    canvas2D::Canvas canvas;
 
     glfwSetWindowUserPointer(window,&example);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -62,7 +61,7 @@ int main(){
     glfwSetCursorPosCallback(window, mouse_pos_callback);
 
     while (!glfwWindowShouldClose(window)) {
-        example.onDraw(canvas);
+        example.onDraw();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

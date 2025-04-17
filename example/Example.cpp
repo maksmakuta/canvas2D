@@ -1,11 +1,10 @@
 #include "Example.hpp"
 
-Example::Example() {
+Example::Example() = default;
 
-}
-
-void Example::onDraw(canvas2D::Canvas& canvas){
-
+void Example::onDraw(){
+    canvas.clear(canvas2D::Color::Red);
+    canvas.clearRect(200,200,500,500);
 }
 
 void Example::onMouse(const glm::vec2& mouse){

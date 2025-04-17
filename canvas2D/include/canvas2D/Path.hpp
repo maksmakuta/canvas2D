@@ -60,6 +60,14 @@ namespace canvas2D {
             QuadraticCurveTo, BezierCurveTo,
             Ellipse, ClosePath
         >;
+
+        //helper methods for std::visit
+        template<class... Ts>
+        struct overload : Ts... { using Ts::operator()...; };
+
+        template<class... Ts>
+        overload(Ts...) -> overload<Ts...>;
+
     }
 
     enum class LineCap {

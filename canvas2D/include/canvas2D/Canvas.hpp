@@ -4,6 +4,7 @@
 #include <string>
 #include <glm/fwd.hpp>
 
+#include "Color.hpp"
 #include "Image.hpp"
 #include "Path.hpp"
 #include "glad/gl.h"
@@ -26,6 +27,10 @@ namespace canvas2D{
     class Canvas{
     public:
         Canvas();
+
+        // control canvas
+        void clear(const Color & color);
+        void resize(int w, int h);
 
         // matrix operations
         void scale(float x, float y);
