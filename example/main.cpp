@@ -10,7 +10,7 @@ Example* getExample(GLFWwindow* w) {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     if (const auto p = getExample(window); p != nullptr) {
-        p->onResize({width,height});
+        p->onResize(glm::ivec2{width,height});
     }
 }
 

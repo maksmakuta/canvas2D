@@ -70,6 +70,8 @@ namespace canvas2D{
     }
 
     void Canvas::resize(const int w, const int h){
+        m_size = {w,h};
+        glViewport(0,0,w,h);
         m_projection = glm::ortho(0.f,static_cast<float>(w),static_cast<float>(h),0.f);
     }
 
@@ -141,8 +143,8 @@ namespace canvas2D{
 
     void Canvas::clearRect(const float x, const float y, const float w, const float h){
         glEnable(GL_SCISSOR_TEST);
-        glScissor((asInt(x)), asInt(y), asInt(w), asInt(h));
-        glClearColor(1, 1, 1, 1);
+        glScissor((asInt(x)), asInt(m_size.y - y - h), asInt(w), asInt(h));
+        glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_SCISSOR_TEST);
     }

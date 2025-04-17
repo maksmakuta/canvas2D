@@ -11,8 +11,8 @@ void Example::onMouse(const glm::vec2& mouse){
 
 }
 
-void Example::onResize(const glm::vec2& size){
-
+void Example::onResize(const glm::ivec2& size){
+    canvas.resize(size.x,size.y);
 }
 
 void Example::onKey(int k, int a, int m){

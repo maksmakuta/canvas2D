@@ -93,6 +93,7 @@ namespace canvas2D{
         glm::mat4 m_transform{1.f};
         glm::mat4 m_projection{1.f};
         Path m_path;
+        glm::vec2 m_size{0.f};
     };
 
 };
