@@ -4,7 +4,10 @@ Example::Example() = default;
 
 void Example::onDraw(){
     canvas.clear(canvas2D::Color::Red);
-    canvas.clearRect(200,200,500,500);
+
+    canvas.beginPath();
+    canvas.rect(0,0,25,25);
+    canvas.fill();
 }
 
 void Example::onMouse(const glm::vec2& mouse){

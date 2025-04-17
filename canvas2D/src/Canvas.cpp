@@ -1,10 +1,9 @@
 #include "canvas2D/Canvas.hpp"
 
 #include "glad/gl.h"
+#include "libtess2/tesselator.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "libtess2/tesselator.h"
 
 namespace canvas2D{
 
@@ -16,53 +15,17 @@ namespace canvas2D{
 
     }
 
-    namespace internal {
+    Canvas::Canvas() {
+        glGenVertexArrays(1, &m_vao);
+        glGenBuffers(1, &m_vbo);
+        glGenBuffers(1, &m_ebo);
 
-        std::vector<glm::vec2> triangulatePath(const Path& path,FillRule fillRule) {
-            std::vector<std::vector<glm::vec2>> contours;
-            std::vector<glm::vec2> currentContour;
-
-            for (const auto& cmd : path.commands()) {
-
-            }
-
-            if (!currentContour.empty()) {
-                contours.push_back(std::move(currentContour));
-            }
-
-            std::vector<glm::vec2> triangles;
-
-            TESStesselator* tess = tessNewTess(nullptr);
-            if (!tess) return triangles;
-
-            for (const auto& contour : contours) {
-                if (contour.size() < 3) continue;
-                tessAddContour(tess, 2, contour.data(), sizeof(glm::vec2), static_cast<int>(contour.size()));
-            }
-
-            if (tessTesselate(tess, fillRule == FillRule::NonZero ? TESS_WINDING_NONZERO : TESS_WINDING_ODD,
-                TESS_POLYGONS, 3, 2, nullptr)
-            ) {
-                const float* verts = tessGetVertices(tess);
-                const int* elems = tessGetElements(tess);
-                const int nelems = tessGetElementCount(tess);
-
-                for (int i = 0; i < nelems; ++i) {
-                    const int* tri = &elems[i * 3];
-                    for (int j = 0; j < 3; ++j) {
-                        int idx = tri[j];
-                        triangles.emplace_back(verts[idx * 2 + 0], verts[idx * 2 + 1]);
-                    }
-                }
-            }
-
-            tessDeleteTess(tess);
-            return triangles;
-        }
-
+        glBindVertexArray(m_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+        glEnableVertexAttribArray(0);
+        glBindVertexArray(0);
     }
-
-    Canvas::Canvas() = default;
 
     void Canvas::clear(const Color & color){
         glClearColor(color.r,color.g,color.b,color.a);
@@ -169,8 +132,56 @@ namespace canvas2D{
         fill(m_path,fillRule);
     }
 
-    void Canvas::fill(const Path& path, FillRule fillRule){
-        const auto polygon = internal::triangulatePath(path,fillRule);
+    void Canvas::fill(const Path& path, const FillRule fillRule){
+        auto contours = std::vector<std::vector<glm::vec2>>();
+        auto current  = std::vector<glm::vec2>();
+        for (const auto item : path.data()) {
+            if (item == internal::PATH_END) {
+                contours.push_back(current);
+                current.clear();
+            }else {
+                current.push_back(item);
+            }
+        }
+
+        TESStesselator* tess = tessNewTess(nullptr);
+        if (!tess) return;
+
+        for (const auto& contour : contours) {
+            if (contour.size() < 3) continue;
+            tessAddContour(tess, 2, contour.data(), sizeof(glm::vec2), static_cast<int>(contour.size()));
+        }
+
+        if (tessTesselate(tess, fillRule == FillRule::NonZero ? TESS_WINDING_NONZERO : TESS_WINDING_ODD,
+            TESS_POLYGONS, 3, 2, nullptr)
+        ) {
+            const float* verts = tessGetVertices(tess);
+            const int* elems = tessGetElements(tess);
+            const int nelems = tessGetElementCount(tess);
+
+            glBindVertexArray(m_vao);
+            if (nelems * 2 > m_vbo_size) {
+                m_vbo_size = nelems * 2;
+                glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                glBufferData(GL_ARRAY_BUFFER, static_cast<int>(m_vbo_size * sizeof(glm::vec2)), nullptr, GL_DYNAMIC_DRAW);
+            }
+
+            if (nelems * 2 > m_ebo_size) {
+                m_ebo_size = nelems * 2;
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<int>(m_ebo_size * sizeof(GLuint)), nullptr, GL_DYNAMIC_DRAW);
+            }
+
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, static_cast<int>(nelems * sizeof(glm::vec2)), verts);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, static_cast<int>(nelems * sizeof(GLuint)), elems);
+            glDrawElements(GL_TRIANGLES, static_cast<int>(m_vbo_size), GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(0);
+
+        }
+
+        tessDeleteTess(tess);
     }
 
     void Canvas::stroke(){

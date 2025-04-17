@@ -1,7 +1,6 @@
 #ifndef PATH_HPP
 #define PATH_HPP
 
-#include <variant>
 #include <vector>
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
@@ -9,65 +8,7 @@
 namespace canvas2D {
 
     namespace internal {
-        struct MoveTo {
-            glm::vec2 point;
-        };
-
-        struct LineTo {
-            glm::vec2 point;
-        };
-
-        struct Rect {
-            glm::vec2 origin; glm::vec2 size;
-        };
-
-        struct Arc {
-            glm::vec2 center;
-            float radius;
-            float startAngle;
-            float endAngle;
-            bool counterclockwise;
-        };
-
-        struct ArcTo {
-            glm::vec2 p1, p2;
-            float radius;
-        };
-
-        struct QuadraticCurveTo {
-            glm::vec2 control;
-            glm::vec2 end;
-        };
-
-        struct BezierCurveTo {
-            glm::vec2 control1;
-            glm::vec2 control2;
-            glm::vec2 end;
-        };
-
-        struct Ellipse {
-            glm::vec2 center;
-            float radiusX, radiusY;
-            float rotation;
-            float startAngle, endAngle;
-            bool counterclockwise;
-        };
-
-        struct ClosePath {};
-
-        using PathCommand = std::variant<
-            MoveTo, LineTo, Rect, Arc, ArcTo,
-            QuadraticCurveTo, BezierCurveTo,
-            Ellipse, ClosePath
-        >;
-
-        //helper methods for std::visit
-        template<class... Ts>
-        struct overload : Ts... { using Ts::operator()...; };
-
-        template<class... Ts>
-        overload(Ts...) -> overload<Ts...>;
-
+        constexpr auto PATH_END = glm::vec2{std::numeric_limits<float>::infinity()};
     }
 
     enum class LineCap {
@@ -99,11 +40,11 @@ namespace canvas2D {
                      float startAngle, float endAngle, bool ccw = false);
         void closePath();
 
-        [[nodiscard]] const std::vector<internal::PathCommand>& commands() const;
+        [[nodiscard]] std::vector<glm::vec2> data() const;
         void clear();
 
     private:
-        std::vector<internal::PathCommand> m_commands;
+        std::vector<glm::vec2> m_data;
     };
 
 }

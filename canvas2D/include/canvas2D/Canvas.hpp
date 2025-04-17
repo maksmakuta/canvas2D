@@ -2,6 +2,7 @@
 #define CANVAS_HPP
 
 #include <string>
+#include <variant>
 #include <glm/fwd.hpp>
 
 #include "Color.hpp"
@@ -112,6 +113,9 @@ namespace canvas2D{
         Path m_path;
         std::vector<float> m_dash;
         glm::vec2 m_size{0.f};
+        uint m_vao{0},m_vbo{0}, m_ebo{0};
+        size_t m_vbo_size = 0;
+        size_t m_ebo_size = 0;
     };
 
 };

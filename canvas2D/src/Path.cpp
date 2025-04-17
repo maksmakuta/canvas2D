@@ -1,5 +1,8 @@
 #include "canvas2D/Path.hpp"
 
+#include <glm/detail/func_trigonometric.inl>
+#include <glm/gtc/constants.hpp>
+
 namespace canvas2D{
 
     Path::Path() = default;
@@ -11,108 +14,204 @@ namespace canvas2D{
     }
 
     void Path::addPath(const Path& p, const glm::mat4 &m) {
-        if (p.commands().empty()) {
+        if (p.data().empty()) {
             return;
         }
 
-        if (!std::holds_alternative<internal::ClosePath>(m_commands.front())) {
-            closePath();
-        }
 
         if (m != glm::mat4{1.f}) {
-            for (const auto& item : p.m_commands) {
-                std::visit(internal::overload{
-                    [&m, this](const internal::MoveTo& mt) {
-                        m_commands.emplace_back(internal::MoveTo{transform(mt.point,m)});
-                    },
-                    [&m, this](const internal::LineTo& l) {
-                        m_commands.emplace_back(internal::LineTo{transform(l.point,m)});
-                    },
-                    [&m, this](const internal::ArcTo& a) {
-                        m_commands.emplace_back(internal::ArcTo{transform(a.p1,m),transform(a.p2,m),a.radius});
-                    },
-                    [&m, this](const internal::QuadraticCurveTo& q) {
-                        m_commands.emplace_back(internal::QuadraticCurveTo{transform(q.control,m),transform(q.end,m)});
-                    },
-                    [&m, this](const internal::BezierCurveTo& b) {
-                        m_commands.emplace_back(internal::BezierCurveTo{transform(b.control1,m),transform(b.control2,m),transform(b.end,m)});
-                    },
-                    [&m, this](const internal::Arc& a) {
-                        m_commands.emplace_back(internal::Arc{transform(a.center,m),a.radius,a.startAngle,a.endAngle,a.counterclockwise});
-                    },
-                    [&m, this](const internal::Rect& r) {
-                        m_commands.emplace_back(internal::Rect{transform(r.origin,m),r.size});
-                    },
-                    [&m, this](const internal::Ellipse& e) {
-                        m_commands.emplace_back(internal::Ellipse{transform(e.center,m),e.radiusX,e.radiusY,e.rotation,e.startAngle,e.endAngle,e.counterclockwise});
-                    },
-                    [this](const internal::ClosePath&) {
-                        m_commands.emplace_back(internal::ClosePath{});
-                    }
-                }, item);
+            for (const auto& item : p.m_data) {
+                m_data.push_back(transform(item,m));
             }
-
         }else {
-            m_commands.insert(m_commands.end(),p.commands().begin(),p.commands().end());
+            m_data.insert(m_data.end(),p.data().begin(),p.data().end());
         }
     }
 
 
     void Path::moveTo(const float x, const float y) {
-        m_commands.emplace_back(internal::MoveTo{glm::vec2(x, y)});
+        if (m_data.empty() || m_data.front() != internal::PATH_END) {
+            closePath();
+        }
+        m_data.emplace_back(x,y);
     }
 
     void Path::lineTo(const float x, const float y) {
-        m_commands.emplace_back(internal::LineTo{glm::vec2(x, y)});
+        m_data.emplace_back(x,y);
     }
 
     void Path::rect(const float x, const float y, const float w, const float h) {
-        m_commands.emplace_back(internal::Rect{glm::vec2(x, y), glm::vec2(w, h)});
+        moveTo(x,y);
+        lineTo(x+w,y);
+        lineTo(x+w,y+h);
+        lineTo(x,y+h);
     }
 
     void Path::arc(const float x, const float y, const float r, const float startAngle, const float endAngle, const bool ccw) {
-        m_commands.emplace_back(internal::Arc{glm::vec2(x, y), r, startAngle, endAngle, ccw});
+        ellipse(x,y,r,r,0,startAngle,endAngle,ccw);
+    }
+
+    bool onSameLine(const glm::vec2& a,const glm::vec2& b,const glm::vec2& c) {
+        const glm::vec2 ab = b - a;
+        const glm::vec2 ac = c - a;
+        const float cross = ab.x * ac.y - ab.y * ac.x;
+        return std::abs(cross) < 0.0001f;
     }
 
     void Path::arcTo(const float x1, const float y1, const float x2, const float y2, const float r) {
-        m_commands.emplace_back(internal::ArcTo{glm::vec2(x1, y1), glm::vec2(x2, y2), r});
+        if (m_data.empty() || m_data.front() == internal::PATH_END) {
+            return;
+        }
+
+        if (r < 0.f) {
+            return;
+        }
+
+        const auto& P0 = m_data.front();
+        const auto P1 = glm::vec2{x1,y1};
+        const auto P2 = glm::vec2{x2,y2};
+
+        if (P0 == P1 || P1 == P2 || r <= 0.00001f || onSameLine(P0,P1,P2)) {
+            m_data.push_back(P1);
+        }
+
+        const auto dir1 = P0 - P1;
+        if (dir1.x == 0 && dir1.y == 0) {
+            return;
+        }
+
+        const auto dir2 = P2 - P1;
+        if (dir2.x == 0 && dir2.y == 0) {
+            return;
+        }
+
+        const auto dir1_unit = glm::normalize(dir1);
+        const auto dir2_unit = glm::normalize(dir2);
+
+        if (const auto dp = dot(dir1_unit, dir2_unit); std::abs(dp) > 0.999999f) {
+            return;
+        }
+        const auto angle = std::acos(dot(dir1_unit, dir2_unit));
+        const auto distToTangent = r / std::tanf(0.5f * angle);
+
+        const auto linePointAt = [](const glm::vec2& p, const float t, const glm::vec2& dir) {
+                return p + t * dir;
+        };
+
+        const auto findCenter = [&linePointAt](const glm::vec2& T, const glm::vec2& d, const float r, const glm::vec2& dirTan) {
+            auto dn = std::abs(d.x) < std::abs(d.y)
+                ? glm::vec2(1, -d.x / d.y)
+                : glm::vec2(-d.y / d.x, 1);
+
+            if (glm::dot(dn, dirTan) < 0) {
+                dn.x = -dn.x;
+                dn.y = -dn.y;
+            }
+
+            return linePointAt(T, r / glm::length(dn), dn);
+        };
+
+        const auto T1 = linePointAt(P1, distToTangent, dir1_unit);
+        const auto T2 = linePointAt(P1, distToTangent, dir2_unit);
+
+        const auto dirT2_T1 = T2 - T1;
+        const auto dirT1_T2 = -dirT2_T1;
+        const auto C1 = findCenter(T1, dir1_unit, r, dirT2_T1);
+        const auto C2 = findCenter(T2, dir2_unit, r, dirT1_T2);
+
+        const auto deltaC = C2 - C1;
+        if (deltaC.x * deltaC.x + deltaC.y * deltaC.y > 1e-4) {
+            // here error
+            return;
+        }
+
+        const auto C = C1 + 0.5f * deltaC;
+        float dot = glm::dot(glm::normalize(C), glm::normalize(T1));
+        dot = glm::clamp(dot, -1.0f, 1.0f);
+        const auto angle1 = acosf(dot);
+        const auto angle2 = angle + angle1;
+        arc(C.x,C.y,r,angle1,angle2);
     }
 
     void Path::quadraticCurveTo(const float cpx, const float cpy, const float x, const float y) {
-        m_commands.emplace_back(internal::QuadraticCurveTo{glm::vec2(cpx, cpy), glm::vec2(x, y)});
+        if (m_data.empty() || m_data.front() == internal::PATH_END) {
+            return;
+        }
+
+        const auto& a = m_data.front();
+        const auto b = glm::vec2{cpx,cpy};
+        const auto c = glm::vec2{x,y};
+        auto t = 0.f;
+        while (t <= 1.f) {
+            const auto t1 = mix(a,b,t);
+            const auto t2 = mix(b,c,t);
+            m_data.push_back(mix(t1,t2,t));
+            t += 0.1f;
+        }
     }
 
     void Path::bezierCurveTo(const float cp1x, const float cp1y, const float cp2x, const float cp2y, const float x, const float y) {
-        m_commands.emplace_back(internal::BezierCurveTo{
-            glm::vec2(cp1x, cp1y),
-            glm::vec2(cp2x, cp2y),
-            glm::vec2(x, y)
-        });
+        if (m_data.empty() || m_data.front() == internal::PATH_END) {
+            moveTo(0,0);
+        }
+
+        const auto& a = m_data.front();
+        const auto b = glm::vec2{cp1x,cp1y};
+        const auto c = glm::vec2{cp2x,cp2y};
+        const auto d = glm::vec2{x,y};
+        auto t = 0.f;
+        while (t <= 1.f) {
+            const auto t1 = mix(a,b,t);
+            const auto t2 = mix(b,c,t);
+            const auto t3 = mix(c,d,t);
+
+            const auto r1 = mix(t1,t2,t);
+            const auto r2 = mix(t2,t3,t);
+
+            m_data.push_back(mix(r1,r2,t));
+            t += 0.1f;
+        }
     }
 
     void Path::ellipse(const float x, const float y, const float radiusX, const float radiusY, const float rotation,
-                       const float startAngle, const float endAngle, const bool ccw) {
-        m_commands.emplace_back(internal::Ellipse{
-            glm::vec2(x, y),
-            radiusX,
-            radiusY,
-            rotation,
-            startAngle,
-            endAngle,
-            ccw
-        });
+                       float startAngle, float endAngle, bool ccw) {
+
+        if (radiusX < 0 || radiusY < 0) {
+            return;
+        }
+
+        if ((!ccw && (endAngle - startAngle) > glm::two_pi<float>()) ||
+            (ccw) && (startAngle - endAngle) > glm::two_pi<float>()) {
+            startAngle = 0.f;
+            endAngle = glm::two_pi<float>();
+            ccw = true;
+        }
+
+        const auto center = glm::vec2{x,y};
+        const auto r = glm::vec2{radiusX,radiusY};
+
+        float a = ccw ? startAngle : endAngle;
+        while (a <= (!ccw ? startAngle : endAngle)) {
+            const auto unit = glm::vec2{cosf(a), sinf(a)};
+            m_data.push_back(center + unit * r);
+            a += glm::radians(5.f);
+            if (a > (!ccw ? startAngle : endAngle)) {
+                a = (!ccw ? startAngle : endAngle);
+            }
+        }
+
     }
 
     void Path::closePath() {
-        m_commands.emplace_back(internal::ClosePath{});
+        if (!m_data.empty() && m_data.front() != internal::PATH_END)
+            m_data.emplace_back(internal::PATH_END);
     }
 
-    const std::vector<internal::PathCommand>& Path::commands() const {
-        return m_commands;
+    std::vector<glm::vec2> Path::data() const {
+        return m_data;
     }
 
     void Path::clear() {
-        m_commands.clear();
+        m_data.clear();
     }
-
 }
