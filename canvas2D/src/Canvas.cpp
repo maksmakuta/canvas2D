@@ -276,4 +276,13 @@ namespace canvas2D{
         m_path.ellipse(x,y,radiusX,radiusY,rotation,startAngle,endAngle,counterclockwise);
     }
 
+    void Canvas::setLineDash(const std::vector<float>& segments) {
+        m_dash = segments;
+    }
+
+    std::vector<float> Canvas::getLineDash() const {
+        return m_dash;
+    }
+
+
 }

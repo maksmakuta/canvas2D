@@ -24,6 +24,8 @@ namespace canvas2D{
     struct Pattern{};
     struct TextMetrics{};
 
+    using Style = std::variant<Color, Gradient, Pattern>;
+
     class Canvas{
     public:
         Canvas();
@@ -89,10 +91,26 @@ namespace canvas2D{
         void arc(float x, float y, float radius, float startAngle, float endAngle, bool counterclockwise = false);
         void ellipse(float x, float y, float radiusX, float radiusY, float rotation, float startAngle, float endAngle, bool counterclockwise = false);
 
+        //styles
+        Style strokeStyle = Color::Black;
+        Style fillStyle = Color::Black;
+
+        // line caps/joins
+        float lineWidth = 1.f;
+        LineCap lineCap = LineCap::Butt;
+        LineJoin lineJoin = LineJoin::Miter;
+        float miterLimit = 10.f;
+
+        // dashed lines
+        void setLineDash(const std::vector<float>& segments);
+        [[nodiscard]] std::vector<float> getLineDash() const;
+        float lineDashOffset;
+
     private:
         glm::mat4 m_transform{1.f};
         glm::mat4 m_projection{1.f};
         Path m_path;
+        std::vector<float> m_dash;
         glm::vec2 m_size{0.f};
     };
 

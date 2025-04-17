@@ -18,6 +18,6 @@
 
 ### Screenshot ([see example](example/Example.cpp))
 
-![image](example/screenshots/.png)
+![image](example/screenshots/img_clearRect.png)
 
  Older screenshots [here](/example/screenshots)
